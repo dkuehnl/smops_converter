@@ -1,0 +1,39 @@
+# ninja log v5
+0	485	7197634625557614	UI_autogen/timestamp	902de9d92bc3aa75
+0	485	7197634625557614	UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+0	485	7197634625557614	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/timestamp	902de9d92bc3aa75
+0	485	7197634625557614	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+488	2077	7197634642484535	CMakeFiles/UI.dir/UI_autogen/mocs_compilation.cpp.obj	73fb122c70090444
+485	2090	7197634642624060	CMakeFiles/UI.dir/main.cpp.obj	6312db0ae43c72b5
+492	2443	7197634646141479	CMakeFiles/UI.dir/mainwindow.cpp.obj	bde2f964a2ff7747
+2444	2790	7197634649494438	UI.exe	f49242da28308aba
+19	205	7197637098952415	UI_autogen/timestamp	902de9d92bc3aa75
+19	205	7197637098952415	UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+19	205	7197637098952415	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/timestamp	902de9d92bc3aa75
+19	205	7197637098952415	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+212	1401	7197637110908208	CMakeFiles/UI.dir/mainwindow.cpp.obj	bde2f964a2ff7747
+1402	1528	7197637112141297	UI.exe	f49242da28308aba
+16	183	7197637705717297	UI_autogen/timestamp	902de9d92bc3aa75
+16	183	7197637705717297	UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+16	183	7197637705717297	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/timestamp	902de9d92bc3aa75
+16	183	7197637705717297	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+189	1464	7197637718523742	CMakeFiles/UI.dir/mainwindow.cpp.obj	bde2f964a2ff7747
+1464	1584	7197637719701024	UI.exe	f49242da28308aba
+16	186	7197643525489932	UI_autogen/timestamp	902de9d92bc3aa75
+16	186	7197643525489932	UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+16	186	7197643525489932	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/timestamp	902de9d92bc3aa75
+16	186	7197643525489932	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+192	1442	7197643538044660	CMakeFiles/UI.dir/mainwindow.cpp.obj	bde2f964a2ff7747
+1442	1565	7197643539255551	UI.exe	f49242da28308aba
+7	191	7197657112155512	UI_autogen/timestamp	902de9d92bc3aa75
+7	191	7197657112155512	UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+7	191	7197657112155512	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/timestamp	902de9d92bc3aa75
+7	191	7197657112155512	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+198	1627	7197657126499028	CMakeFiles/UI.dir/mainwindow.cpp.obj	bde2f964a2ff7747
+1628	1757	7197657127775518	UI.exe	f49242da28308aba
+17	193	7197661696574838	UI_autogen/timestamp	902de9d92bc3aa75
+17	193	7197661696574838	UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+17	193	7197661696574838	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/timestamp	902de9d92bc3aa75
+17	193	7197661696574838	C:/Users/dkueh/OneDrive/Dokumente/Programming/TSOV Filter-Konverter/build-UI-Desktop_Qt_6_6_0_MinGW_64_bit-Debug/UI_autogen/mocs_compilation.cpp	902de9d92bc3aa75
+200	2030	7197661714933198	CMakeFiles/UI.dir/mainwindow.cpp.obj	bde2f964a2ff7747
+2030	2159	7197661716198968	UI.exe	f49242da28308aba
