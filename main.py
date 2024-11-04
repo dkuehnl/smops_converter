@@ -17,10 +17,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self) 
-        self.setWindowTitle("SMOPS-Konverter v1.0")
+        self.setWindowTitle("SMOPS-Konverter v2.1")
 
         self.ui.btn_File_Browse.clicked.connect(self.file_browse)
         self.ui.le_Dateipfad.returnPressed.connect(self.extract_first_line)
+        self.ui.btn_chg_delim.clicked.connect(self.extract_first_line)
         self.ui.btn_convert.clicked.connect(self.convert)
         self.ui.lbl_statusmeldung.hide()
         self.ui.btn_reset.clicked.connect(self.reset)
@@ -41,6 +42,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def extract_first_line(self): 
         file_path = self.ui.le_Dateipfad.text()
         self.ui.lbl_statusmeldung.hide()
+        delim = self.ui.cb_Delim.currentText()
 
         #ComBox clearen
         cb_length = self.ui.cb_Spaltenwahl.count() 
@@ -51,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #CSV einlesen + Spaltenbeschriftung als Auswahl setzen
         if file_path.endswith(".csv"): 
             with open(file_path, newline="", encoding="UTF-8") as oldfile: 
-                reader = csv.reader(oldfile, delimiter=",", quotechar='"', dialect="unix")
+                reader = csv.reader(oldfile, delimiter=delim, quotechar='"', dialect="unix")
                 for line in reader: 
                     if len(line) == 1: 
                         self.ui.lbl_statusmeldung.setText(".csv-Datei korrupt, Spalten konnte nicht erkannt werden.")
@@ -86,12 +88,23 @@ class MainWindow(QtWidgets.QMainWindow):
 
         #Convert-Routine / Match-Phrases suchen und zwischenspeichern 
         old_match_phrase = self.ui.cb_Spaltenwahl.currentText() 
-        
         if self.ui.tbw_programm.currentIndex() == 0: 
-            old_value_count, other_count, duplicate_count, new_value_count = self.convert_smops(filepath, old_match_phrase)
+            result = self.convert_smops(filepath, old_match_phrase)
+            if result is None: 
+                self.ui.lbl_statusmeldung.setText("Fehler bei Convertierung.")
+                self.ui.lbl_statusmeldung.show()
+                return
+            else: 
+                old_value_count, other_count, duplicate_count, new_value_count = result
 
         elif self.ui.tbw_programm.currentIndex() == 1: 
-            old_value_count, other_count, duplicate_count, new_value_count = self.convert_eosight(filepath, old_match_phrase)
+            result = self.convert_eosight(filepath, old_match_phrase)
+            if result is None:
+                self.ui.lbl_statusmeldung.setText("Fehler bei Convertierung.")
+                self.ui.lbl_statusmeldung.show()
+                return
+            else: 
+                old_value_count, other_count, duplicate_count, new_value_count = result
         else: 
             print("Error")
     
@@ -118,9 +131,14 @@ class MainWindow(QtWidgets.QMainWindow):
             return
             
         #Convert-Routine / Ursprungsdatei einlesen
-        unique_value_list, old_value_count, other_count, duplicate_count = self.get_unique_value_list(filepath, old_match_phrase)            
+        result = self.get_unique_value_list(filepath, old_match_phrase)
+        if result is None: 
+            return None
+        else: 
+            unique_value_list, old_value_count, other_count, duplicate_count = result
+        
         #Ziel-Dateipfad und -namen generieren
-        new_path = self.get_new_filepath()
+        new_path = self.get_new_filepath("SMOPS")
     
         #Should or must not Auswahl + entsprechenden Filter bauen
         new_value_count = 0
@@ -158,35 +176,47 @@ class MainWindow(QtWidgets.QMainWindow):
             return 
 
         #Convert-Routine / Ursprungsdatei einlesen
-        unique_value_list, old_value_count, other_count, duplicate_count = self.get_unique_value_list(filepath, old_match_phrase)            
+        result = self.get_unique_value_list(filepath, old_match_phrase)
+        if result is None: 
+            return None
+        else: 
+            unique_value_list, old_value_count, other_count, duplicate_count = result            
         #Ziel-Dateipfad und -namen generieren
-        new_path = self.get_new_filepath()
+        new_path = self.get_new_filepath("eoSight")
 
         #Should or must not Auswahl + entsprechenden Filter bauen
         new_value_count = 0
         with open(new_path, "x") as newfile:
             if self.ui.rb_eoSight_contains.isChecked() == True: 
                 for i in range(0, len(unique_value_list)-1): 
-                    new_value_count = new_value_count + 1
+                    new_value_count += 1
                     newfile.write("CONTAINS(["+ new_match_phrase + '], "' + unique_value_list[i] + '") or ')
                 newfile.write("CONTAINS([" + new_match_phrase + '], "' + unique_value_list[-1] + '")')
-                new_value_count = new_value_count + 1
+                new_value_count += 1
 
 
             elif self.ui.rb_eoSight_equal.isChecked() == True: 
                 for i in range(0, len(unique_value_list)-1): 
-                    new_value_count = new_value_count + 1
+                    new_value_count += 1
                     newfile.write("[" + new_match_phrase + '] = "' + unique_value_list[i] + '" or ')
                 newfile.write("[" + new_match_phrase + '] = "' + unique_value_list[-1] + '"')
-                new_value_count = new_value_count + 1
-
+                new_value_count += 1
+            
+            elif self.ui.rb_eoSight_begins.isChecked() == True:
+                newfile.write("[" + new_match_phrase + "] begins (")
+                for i in range(0, len(unique_value_list)-1):
+                    new_value_count += 1
+                    newfile.write('"' + unique_value_list[i] + '",')
+                newfile.write('"' + unique_value_list[-1] + '")')
+                new_value_count += 1
         return old_value_count, other_count, duplicate_count, new_value_count
 
     def get_unique_value_list(self, filepath, old_match_phrase): 
         search_list = []
         search_counter = 0
+        delim = self.ui.cb_Delim.currentText() 
         with open(filepath, newline="", encoding="UTF-8") as oldfile: 
-            reader = csv.reader(oldfile, delimiter=",", quotechar='"', dialect="unix")
+            reader = csv.reader(oldfile, delimiter=delim, quotechar='"', dialect="unix")
             for line in reader:
                 if len(line) == 1: 
                     self.ui.lbl_statusmeldung.setText(".csv-Datei korrupt, Spalten konnte nicht erkannt werden.")
@@ -195,8 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 else: 
                     for element in line: 
                         search_list.append(element) 
-                    break 
-            
+                    break             
             #Search-Counter finden für Match-Phrase
             for element in search_list: 
                 if old_match_phrase in element: 
@@ -205,12 +234,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     search_counter = search_counter + 1
             
             #Convertierungs-Routine 
-
             old_value_count = 0
             set_counter = 0
             value_list = []
             with open(filepath, newline="", encoding="UTF-8") as oldfile: 
-                reader = csv.reader(oldfile, delimiter=",", quotechar='"', dialect="unix")
+                reader = csv.reader(oldfile, delimiter=delim, quotechar='"', dialect="unix")
                 for line in reader:
                     if len(line) == 1: 
                         self.ui.lbl_statusmeldung.setText(".csv-Datei korrupt, Spalten konnte nicht erkannt werden.")
@@ -222,8 +250,8 @@ class MainWindow(QtWidgets.QMainWindow):
                             continue
                         else: 
                             old_value_count = old_value_count + 1
-                            value_list.append(line[search_counter])
-            
+                            value_list.append(line[search_counter])   
+
             #value_list aufräumen -entfernen von Other-Einträgen
             other_count = 0
             for element in value_list: 
@@ -232,7 +260,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     value_list.remove(element)
                 else: 
                     continue
-            
+
             #Duplikate in value_list entfernen 
             unique_value_list = []
             duplicate_count = 0
@@ -245,7 +273,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return unique_value_list, old_value_count, other_count, duplicate_count
 
-    def get_new_filepath(self): 
+    def get_new_filepath(self, kind): 
         #Wahl des Pfades anhand der Eingaben
         if self.ui.le_new_Path.text() == "Bitte Dateipfad einfügen ": 
             filepath = self.ui.le_Dateipfad.text() 
@@ -264,7 +292,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         #filename generieren
-        filename = file + "_Converted.txt"
+        filename = file + "_" + kind + "_Converted.txt"
         file_number = 0 
         for i in range(0, len(os.listdir(new_dir))): 
             if filename in os.listdir(new_dir): 
