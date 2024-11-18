@@ -17,7 +17,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self) 
-        self.setWindowTitle("SMOPS-Konverter v2.1")
+        self.setWindowTitle("SMOPS-Konverter v2.2")
 
         self.ui.btn_File_Browse.clicked.connect(self.file_browse)
         self.ui.le_Dateipfad.returnPressed.connect(self.extract_first_line)
@@ -95,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.lbl_statusmeldung.show()
                 return
             else: 
-                old_value_count, other_count, duplicate_count, new_value_count = result
+                old_value_count, other_count, duplicate_count, new_value_count, empty_line = result
 
         elif self.ui.tbw_programm.currentIndex() == 1: 
             result = self.convert_eosight(filepath, old_match_phrase)
@@ -104,14 +104,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.lbl_statusmeldung.show()
                 return
             else: 
-                old_value_count, other_count, duplicate_count, new_value_count = result
+                old_value_count, other_count, duplicate_count, new_value_count, empty_line = result
+        
+        elif self.ui.tbw_programm.currentIndex() == 2: 
+            result = self.convert_eoLive(filepath, old_match_phrase)
+            if result is None: 
+                self.ui.lbl_statusmeldung.setText("Fehler bei Convertierung.")
+                self.ui.lbl_statusmeldung.show()
+                return
+            else:
+                old_value_count, other_count, duplicate_count, new_value_count, empty_line = result
         else: 
-            print("Error")
+            self.ui.lbl_statusmeldung.setText("Undefinierter Fehler.")
+            self.ui.lbl_statusmeldung.show()
     
 
         self.ui.lbl_statusmeldung.setText("Konvertierung erfolgreich abgeschlossen.")
         self.ui.lbl_statusmeldung.show()
-        self.ui.lbl_ergebnis.setText("Es wurden " + str(old_value_count) + " Zeilen eingelesen. \nDavon " + str(other_count) + " Other-Zeilen entfernt, " + str(duplicate_count) + " als Duplikate erkannt und " + str(new_value_count) + " in den neuen Filter überschrieben.")
+        self.ui.lbl_ergebnis.setText("Es wurden " + str(old_value_count) + " Zeilen eingelesen. \nDavon " + str(other_count) + " Other-Zeilen entfernt, " + str(duplicate_count) + " als Duplikate erkannt, " + str(empty_line) + " Leerzeilen und " + str(new_value_count) + " in den neuen Filter überschrieben.")
         self.ui.lbl_ergebnis.show()
 
     def convert_smops(self, filepath, old_match_phrase):
@@ -123,8 +133,8 @@ class MainWindow(QtWidgets.QMainWindow):
             new_match_phrase = self.ui.cb_ne.currentText()
         elif self.ui.cb_reg_ne.currentText() != "": 
             new_match_phrase = self.ui.cb_reg_ne.currentText() 
-        elif self.ui.le_alternativer_Filter.text() != "": 
-            new_match_phrase = self.ui.le_alternativer_Filter.text() 
+        elif self.ui.le_alternativer_Filter_SMOPS.text() != "": 
+            new_match_phrase = self.ui.le_alternativer_Filter_SMOPS.text() 
         else: 
             self.ui.lbl_statusmeldung.setText("Fehler! Keine Zielkonvertierung ausgewählt!")
             self.ui.lbl_statusmeldung.show()
@@ -135,7 +145,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if result is None: 
             return None
         else: 
-            unique_value_list, old_value_count, other_count, duplicate_count = result
+            unique_value_list, old_value_count, other_count, duplicate_count, empty_line = result
         
         #Ziel-Dateipfad und -namen generieren
         new_path = self.get_new_filepath("SMOPS")
@@ -146,30 +156,30 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.ui.rb_isoneof.isChecked() == True: 
                 newfile.write("{\n" + '"query": {\n' + '"bool": {\n' + '"should": [\n')
                 for i in range(0, len(unique_value_list)-1): 
-                    new_value_count = new_value_count + 1
+                    new_value_count += 1
                     newfile.write("{\n" + '"match_phrase": {\n' + '"' + new_match_phrase + '": "' + unique_value_list[i] + '"\n' + "}\n" + "},\n")
                 newfile.write("{\n" + '"match_phrase": {\n' + '"' + new_match_phrase + '": "' + unique_value_list[-1] + '"\n' + "}\n" + "}\n")
-                new_value_count = new_value_count + 1
+                new_value_count += 1
                 newfile.write("],\n" + '"minimum_should_match": 1\n' + "}\n" + "}\n" + "}")
 
             elif self.ui.rb_isnotoneof.isChecked() == True: 
                 newfile.write("{\n" + '"query": {\n' + '"bool": {\n' + '"must_not": [\n')
                 for i in range(0, len(unique_value_list)-1): 
-                    new_value_count = new_value_count + 1
+                    new_value_count += 1
                     newfile.write("{\n" + '"match_phrase": {\n' + '"' + new_match_phrase + '": "' + unique_value_list[i] + '"\n' + "}\n" + "},\n")
                 newfile.write("{\n" + '"match_phrase": {\n' + '"' + new_match_phrase + '": "' + unique_value_list[-1] + '"\n' + "}\n" + "}\n")
-                new_value_count = new_value_count + 1
+                new_value_count += 1
                 newfile.write("],\n" + '"minimum_should_match": 1\n' + "}\n" + "}\n" + "}")
 
+        return old_value_count, other_count, duplicate_count, new_value_count, empty_line
 
-        return old_value_count, other_count, duplicate_count, new_value_count
 
     def convert_eosight(self, filepath, old_match_phrase):
 
         if self.ui.cb_number_eoSight.currentText() != "":
             new_match_phrase = self.ui.cb_number_eoSight.currentText()
-        elif self.ui.le_alternativer_Filter.text() != "": 
-            new_match_phrase = self.ui.le_alternativer_Filter.text() 
+        elif self.ui.le_alternativer_Filter_eoSight.text() != "": 
+            new_match_phrase = self.ui.le_alternativer_Filter_eoSight.text() 
         else: 
             self.ui.lbl_statusmeldung.setText("Fehler! Keine Zielkonvertierung ausgewählt!")
             self.ui.lbl_statusmeldung.show()
@@ -180,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if result is None: 
             return None
         else: 
-            unique_value_list, old_value_count, other_count, duplicate_count = result            
+            unique_value_list, old_value_count, other_count, duplicate_count, empty_line = result            
         #Ziel-Dateipfad und -namen generieren
         new_path = self.get_new_filepath("eoSight")
 
@@ -193,8 +203,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     newfile.write("CONTAINS(["+ new_match_phrase + '], "' + unique_value_list[i] + '") or ')
                 newfile.write("CONTAINS([" + new_match_phrase + '], "' + unique_value_list[-1] + '")')
                 new_value_count += 1
-
-
             elif self.ui.rb_eoSight_equal.isChecked() == True: 
                 for i in range(0, len(unique_value_list)-1): 
                     new_value_count += 1
@@ -202,15 +210,40 @@ class MainWindow(QtWidgets.QMainWindow):
                 newfile.write("[" + new_match_phrase + '] = "' + unique_value_list[-1] + '"')
                 new_value_count += 1
             
-            elif self.ui.rb_eoSight_begins.isChecked() == True:
+        return old_value_count, other_count, duplicate_count, new_value_count, empty_line
+
+    def convert_eoLive(self, filepath, old_match_phrase):
+
+        if self.ui.cb_number_eoLive.currentText() != "":
+            new_match_phrase = self.ui.cb_number_eoSight.currentText()
+        elif self.ui.le_alternativer_Filter_eoLive.text() != "": 
+            new_match_phrase = self.ui.le_alternativer_Filter_eoLive.text() 
+        else: 
+            self.ui.lbl_statusmeldung.setText("Fehler! Keine Zielkonvertierung ausgewählt!")
+            self.ui.lbl_statusmeldung.show()
+            return 
+
+        #Convert-Routine / Ursprungsdatei einlesen
+        result = self.get_unique_value_list(filepath, old_match_phrase)
+        if result is None: 
+            return None
+        else: 
+            unique_value_list, old_value_count, other_count, duplicate_count, empty_line = result            
+        #Ziel-Dateipfad und -namen generieren
+        new_path = self.get_new_filepath("eoLive")
+
+        #Should or must not Auswahl + entsprechenden Filter bauen
+        new_value_count = 0
+        with open(new_path, "x") as newfile:
+            if self.ui.rb_eoLive_begin.isChecked() == True:
                 newfile.write("[" + new_match_phrase + "] begins (")
                 for i in range(0, len(unique_value_list)-1):
                     new_value_count += 1
                     newfile.write('"' + unique_value_list[i] + '",')
                 newfile.write('"' + unique_value_list[-1] + '")')
                 new_value_count += 1
-        return old_value_count, other_count, duplicate_count, new_value_count
-
+        return old_value_count, other_count, duplicate_count, new_value_count, empty_line
+    
     def get_unique_value_list(self, filepath, old_match_phrase): 
         search_list = []
         search_counter = 0
@@ -231,11 +264,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 if old_match_phrase in element: 
                     break
                 else: 
-                    search_counter = search_counter + 1
+                    search_counter += + 1
             
             #Convertierungs-Routine 
             old_value_count = 0
             set_counter = 0
+            empty_line = 0
             value_list = []
             with open(filepath, newline="", encoding="UTF-8") as oldfile: 
                 reader = csv.reader(oldfile, delimiter=delim, quotechar='"', dialect="unix")
@@ -246,17 +280,20 @@ class MainWindow(QtWidgets.QMainWindow):
                         return 
                     else: 
                         if set_counter == 0: 
-                            set_counter = set_counter + 1
+                            set_counter += + 1
                             continue
                         else: 
-                            old_value_count = old_value_count + 1
-                            value_list.append(line[search_counter])   
+                            if len(line) != 0:
+                                old_value_count +=+ 1
+                                value_list.append(line[search_counter])   
+                            else: 
+                                empty_line +=1
 
             #value_list aufräumen -entfernen von Other-Einträgen
             other_count = 0
             for element in value_list: 
                 if "Other" in element: 
-                    other_count = other_count + 1
+                    other_count += + 1
                     value_list.remove(element)
                 else: 
                     continue
@@ -268,10 +305,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 if value not in unique_value_list: 
                     unique_value_list.append(value)
                 else: 
-                    duplicate_count = duplicate_count + 1
+                    duplicate_count += + 1
                     continue
 
-        return unique_value_list, old_value_count, other_count, duplicate_count
+        return unique_value_list, old_value_count, other_count, duplicate_count, empty_line
 
     def get_new_filepath(self, kind): 
         #Wahl des Pfades anhand der Eingaben
@@ -315,7 +352,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.ui.cb_Spaltenwahl.itemText(0) == "": 
                 return "Fehler 2" 
             else: 
-                if self.ui.cb_ne.currentText() == "" and self.ui.cb_reg_ne.currentText() == "" and self.ui.cb_number.currentText() == "" and self.ui.le_alternativer_Filter.text() == "": 
+                if self.ui.cb_ne.currentText() == "" and self.ui.cb_reg_ne.currentText() == "" and self.ui.cb_number.currentText() == "" and (self.ui.le_alternativer_Filter_SMOPS.text() == "" or self.ui.le_alternativer_Filter_eoSight.text() == "" or self.ui.le_alternativer_Filter_eoLive.text() == ""): 
                     return "Fehler 3" 
                 else: 
                     return "Alles gut"
@@ -327,7 +364,9 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in range(0, cb_length): 
             self.ui.cb_Spaltenwahl.removeItem(i)
         self.ui.cb_Spaltenwahl.setItemText(0, "")
-        self.ui.le_alternativer_Filter.setText("")
+        self.ui.le_alternativer_Filter_SMOPS.setText("")
+        self.ui.le_alternativer_Filter_eoSight.setText("")
+        self.ui.le_alternativer_Filter_eoLive.setText("")
         self.ui.le_new_Path.setText("Bitte Dateipfad einfügen ")  
         self.ui.cb_ne.setCurrentIndex(0)
         self.ui.cb_number.setCurrentIndex(0)
