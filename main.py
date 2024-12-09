@@ -17,7 +17,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self) 
-        self.setWindowTitle("SMOPS-Konverter v2.2")
+        self.setWindowTitle("SMOPS-Konverter v2.3")
 
         print(self.ui.cb_number_eoLive.count())
 
