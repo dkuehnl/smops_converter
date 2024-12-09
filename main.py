@@ -19,6 +19,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self) 
         self.setWindowTitle("SMOPS-Konverter v2.2")
 
+        print(self.ui.cb_number_eoLive.count())
+
         self.ui.btn_File_Browse.clicked.connect(self.file_browse)
         self.ui.le_Dateipfad.returnPressed.connect(self.extract_first_line)
         self.ui.btn_chg_delim.clicked.connect(self.extract_first_line)
@@ -213,9 +215,9 @@ class MainWindow(QtWidgets.QMainWindow):
         return old_value_count, other_count, duplicate_count, new_value_count, empty_line
 
     def convert_eoLive(self, filepath, old_match_phrase):
-
+        
         if self.ui.cb_number_eoLive.currentText() != "":
-            new_match_phrase = self.ui.cb_number_eoSight.currentText()
+            new_match_phrase = self.ui.cb_number_eoLive.currentText() 
         elif self.ui.le_alternativer_Filter_eoLive.text() != "": 
             new_match_phrase = self.ui.le_alternativer_Filter_eoLive.text() 
         else: 
